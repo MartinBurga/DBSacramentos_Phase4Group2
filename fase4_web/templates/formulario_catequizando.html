@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+<h2>{{ accion }} catequizando</h2>
+
+<form method="post">
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="nombre" class="form-control"
+               value="{{ catequizando.nombre if catequizando else '' }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Apellido</label>
+        <input type="text" name="apellido" class="form-control"
+               value="{{ catequizando.apellido if catequizando else '' }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Cédula</label>
+        <input type="text" name="cedula" class="form-control"
+               value="{{ catequizando.cedula if catequizando else '' }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Fecha de nacimiento</label>
+        <input type="date" name="fechaNacimiento" class="form-control"
+               value="{{ catequizando.fechaNacimiento if catequizando else '' }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Detalles</label>
+        <textarea name="detalles" class="form-control" rows="3">
+{{ catequizando.detalles if catequizando else '' }}</textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">idNivel (opcional)</label>
+        <input type="number" name="idNivel" class="form-control"
+               value="{{ catequizando.idNivel if catequizando and catequizando.idNivel is not none else '' }}">
+    </div>
+
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a href="{{ url_for('listar_catequizandos') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
