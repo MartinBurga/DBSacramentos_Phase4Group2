@@ -1,48 +1,158 @@
 {% extends "base.html" %}
 
 {% block contenido %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Listado de Catequizandos</h2>
-    <a href="{{ url_for('nuevo_catequizando') }}" class="btn btn-primary">
-        + Nuevo
-    </a>
+<div class="main-card">
+
+    <!-- CABECERA CON TÍTULO Y BOTÓN -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="section-title mb-1">
+                <i class="fa-solid fa-cross title-cross"></i>
+                <span>Listado de Catequizandos</span>
+            </h2>
+            <div class="text-muted small">
+                Gestión de niños y niñas inscritos en catequesis parroquial.
+            </div>
+        </div>
+
+        <a href="{{ url_for('nuevo_catequizando') }}" class="btn btn-sgold">
+            <i class="fa-solid fa-user-plus me-1"></i>
+            Nuevo catequizando
+        </a>
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
+            <div class="summary-card">
+                <div class="summary-label">
+                    <i class="fa-solid fa-people-group me-1"></i>
+                    Total de catequizandos
+                </div>
+                <div class="summary-value">
+                    {{ total }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="summary-card">
+                <div class="summary-label mb-2">
+                    <i class="fa-solid fa-layer-group me-1"></i>
+                    Distribución por nivel
+                </div>
+                {% if niveles_resumen %}
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for nivel, cant in niveles_resumen %}
+                        <span class="badge rounded-pill bg-level">
+                            Nivel {{ nivel }} · {{ cant }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <span class="text-muted small">
+                        Aún no hay niveles asignados.
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- BUSCADOR -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text"
+                       id="buscador"
+                       class="form-control"
+                       placeholder="Buscar por nombre o cédula...">
+            </div>
+            <div class="form-text small text-muted">
+                Escribe parte del nombre o de la cédula para filtrar.
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA -->
+    <table class="table table-striped table-bordered sacred-table align-middle" id="tablaCatequizandos">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre completo</th>
+                <th>Cédula</th>
+                <th>Fecha Nac.</th>
+                <th>Detalles</th>
+                <th>idNivel</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in catequizandos %}
+            <tr>
+                <td>{{ c.idCatequizando }}</td>
+                <td>{{ c.nombre }} {{ c.apellido }}</td>
+                <td>{{ c.cedula }}</td>
+                <td>{{ c.fechaNacimiento }}</td>
+                <td>{{ c.detalles }}</td>
+                <td>{{ c.idNivel }}</td>
+                <td class="text-center">
+                    <a href="{{ url_for('editar_catequizando', idCatequizando=c.idCatequizando) }}"
+                       class="btn btn-sm btn-outline-sgold me-1"
+                       title="Editar">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+
+                    <form action="{{ url_for('eliminar_catequizando', idCatequizando=c.idCatequizando) }}"
+                          method="post"
+                          style="display:inline-block"
+                          onsubmit="return confirm('¿Eliminar este catequizando?');">
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-danger"
+                                title="Eliminar">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center text-muted py-4">
+                    No hay catequizandos registrados aún
+                    <i class="fa-solid fa-cross subtle-cross"></i>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
-<table class="table table-striped table-bordered">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Nombre completo</th>
-            <th>Cédula</th>
-            <th>Fecha Nac.</th>
-            <th>Detalles</th>
-            <th>idNivel</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for c in catequizandos %}
-        <tr>
-            <td>{{ c.idCatequizando }}</td>
-            <td>{{ c.nombre }} {{ c.apellido }}</td>
-            <td>{{ c.cedula }}</td>
-            <td>{{ c.fechaNacimiento }}</td>
-            <td>{{ c.detalles }}</td>
-            <td>{{ c.idNivel }}</td>
-            <td>
-                <a href="{{ url_for('editar_catequizando', idCatequizando=c.idCatequizando) }}"
-                   class="btn btn-sm btn-warning">Editar</a>
+<!-- SCRIPT DE BÚSQUEDA (CLIENTE) -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("buscador");
+    const tabla = document.getElementById("tablaCatequizandos").getElementsByTagName("tbody")[0];
 
-                <form action="{{ url_for('eliminar_catequizando', idCatequizando=c.idCatequizando) }}"
-                      method="post" style="display:inline-block"
-                      onsubmit="return confirm('¿Eliminar este catequizando?');">
-                    <button type="submit" class="btn btn-sm btn-danger">
-                        Eliminar
-                    </button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    input.addEventListener("keyup", function () {
+        const filtro = input.value.toLowerCase().trim();
+        const filas = tabla.getElementsByTagName("tr");
+
+        for (let i = 0; i < filas.length; i++) {
+            const celdas = filas[i].getElementsByTagName("td");
+            if (celdas.length === 0) continue;
+
+            const nombre = (celdas[1].innerText || "").toLowerCase();
+            const cedula = (celdas[2].innerText || "").toLowerCase();
+
+            if (nombre.includes(filtro) || cedula.includes(filtro) || filtro === "") {
+                filas[i].style.display = "";
+            } else {
+                filas[i].style.display = "none";
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

@@ -1,11 +1,12 @@
 # app.py
 from flask import Flask, render_template, request, redirect, url_for, flash
 from db import get_connection
+from collections import Counter
+
 
 app = Flask(__name__)
 app.secret_key = "clave_super_secreta"  # Necesario para usar flash()
 
-# LISTAR catequizandos
 @app.route("/")
 def listar_catequizandos():
     conn = get_connection()
@@ -18,10 +19,25 @@ def listar_catequizandos():
     """
     cursor.execute(sql)
     rows = cursor.fetchall()
-
     conn.close()
-    return render_template("listar_catequizandos.html", catequizandos=rows)
 
+    # Resumen
+    total = len(rows)
+    niveles_counter = Counter()
+
+    for r in rows:
+        if r.idNivel is not None:
+            niveles_counter[r.idNivel] += 1
+
+    # Convertimos a lista de tuplas (nivel, cantidad) para la plantilla
+    niveles_resumen = sorted(niveles_counter.items())
+
+    return render_template(
+        "listar_catequizandos.html",
+        catequizandos=rows,
+        total=total,
+        niveles_resumen=niveles_resumen
+    )
 # CREAR catequizando (GET = form, POST = guardar)
 @app.route("/nuevo", methods=["GET", "POST"])
 def nuevo_catequizando():
